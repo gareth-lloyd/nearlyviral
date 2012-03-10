@@ -1,5 +1,31 @@
 <html>
-    <body>
-        hi
-    </body>
+<head>
+    <script src="/static/js/mustache.js" type="text/javascript"></script>
+    <script src="/static/js/jquery.js" type="text/javascript"></script>
+    <script src="/static/js/ICanHaz.js" type="text/javascript"></script>
+
+    <script src="/static/js/underscore.js" type="text/javascript"></script>
+    <script src="/static/js/backbone.js" type="text/javascript"></script>
+
+    <script src="/static/js/links.js" type="text/javascript"></script>
+
+    <script type='text/html' id='video_template'>
+        <div class="video_title">
+            {{title}}
+        </div>
+        <div class="video_player">
+            <iframe class="youtube-player" type="text/html" width="320" height="192" src="http://www.youtube.com/embed/{{id}}" frameborder="0">
+            </iframe>
+        </div>
+        <div class="video_description">
+            {{description}}
+        </div>
+    </script>
+</head>
+<body>
+    <h1>What's Twitter Watching?</h1>
+
+    <div id="videos">
+    </div>
+</body>
 </html>
