@@ -1,0 +1,139 @@
+Abu Dhabi
+Adelaide
+Alaska
+Almatinki
+Hobart
+Hong Kong
+Indiana (East)
+International Date Line West
+Irkutsk
+Islamabad
+Istanbul
+Jakarta
+Jerusalem
+Kabul
+Kamchatka
+Karachi
+Kathmandu
+Kolkata
+Krasnoyarsk
+Kuala Lumpur
+Kuwait
+Kyiv
+La Paz
+Lima
+Lisbon
+Ljubljana
+London
+Madrid
+Magadan
+Marshall Is.
+Mazatlan
+Melbourne
+Mexico City
+Mid-Atlantic
+Midway Island
+Minsk
+Monrovia
+Monterrey
+Moscow
+Mountain Time (US & Canada)
+Mumbai
+Muscat
+Nairobi
+New Caledonia
+New Delhi
+Newfoundland
+Novosibirsk
+Nuku'alofa
+Osaka
+Pacific Time (US & Canada)
+Paris
+Perth
+Port Moresby
+Prague
+Pretoria
+Quito
+Rangoon
+Riga
+Riyadh
+Rome
+Samoa
+Santiago
+Sapporo
+Sarajevo
+Saskatchewan
+Seoul
+Singapore
+Skopje
+Sofia
+Sri Jayawardenepura
+St. Petersburg
+Stockholm
+Sydney
+Taipei
+Tallinn
+Tashkent
+Tbilisi
+Tehran
+Tijuana
+Tokyo
+Ulaan Bataar
+Urumqi
+Vienna
+Vilnius
+Vladivostok
+Volgograd
+Warsaw
+Wellington
+West Central Africa
+Yakutsk
+Yerevan
+Zagreb
+Amsterdam
+Arizona
+Astana
+Athens
+Atlantic Time (Canada)
+Auckland
+Azores
+Baghdad
+Baku
+Bangkok
+Beijing
+Belgrade
+Berlin
+Bern
+Bogota
+Brasilia
+Bratislava
+Brisbane
+Brussels
+Bucharest
+Budapest
+Buenos Aires
+Cairo
+Canberra
+Cape Verde Is.
+Caracas
+Casablanca
+Central America
+Central Time (US & Canada)
+Chennai
+Chihuahua
+Chongqing
+Copenhagen
+Darwin
+Dhaka
+Dublin
+Eastern Time (US & Canada)
+Edinburgh
+Ekaterinburg
+Fiji
+Georgetown
+Greenland
+Guadalajara
+Guam
+Hanoi
+Harare
+Hawa
