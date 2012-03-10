@@ -16,6 +16,7 @@ TEST_DATA = {
     'http://www.youtube.com/user/TsunamiDopeHouse/videos': False,
     'http://www.youtube.com/commercialmusicgroup': False,
     'http://www.youtube.com/': False,
+    'http://www.youtube.com/watch?v=G9R4O06VdPw?=1f5b': 'G9R4O06VdPw'
 
 
     'https://vimeo.com/38221464': '38221464',
@@ -24,6 +25,8 @@ TEST_DATA = {
     'http://vimeo.com/user7091956/garryclarksonnewport': False,
     'http://www.vimeo.com/vamp/leon': False,
     'http://vimeo.com/invisible/kony2012': False,
+    'http://vimeo.com/hd#37848135': '37848135',
+    'http://player.vimeo.com/video/37119711?title=0&byline=0&portrait=0&color=d13030&quot': '37119711',
 
     'http://adf.ly/68t3C': False,
     None: False,

@@ -27,6 +27,7 @@ def get_query_arg(query, arg):
 def vid_identifier(url):
     url = url or ''
     scheme, domain, path, params, query, fragment = urlparse(url)
+    domain = domain.lower()
 
     if domain in('youtube.com', 'www.youtube.com'):
         try:
@@ -39,9 +40,12 @@ def vid_identifier(url):
         return path.lstrip('/')
 
     elif domain == 'm.youtube.com':
-        try:
-            return get_query_arg(fragment.split('?')[1], 'v')
-        except KeyError:
+        if fragment:
+            try:
+                return get_query_arg(fragment.split('?')[1], 'v')
+            except KeyError:
+                pass
+        if query:
             try:
                 return get_query_arg(query, 'v')
             except KeyError:
@@ -53,3 +57,4 @@ def vid_identifier(url):
             return path
 
     return False
+
