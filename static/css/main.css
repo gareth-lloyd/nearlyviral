@@ -1,0 +1,23 @@
+body {
+  color: #EEE;
+  font: .9em helvetica, verdana, arial, sans-serif;
+  margin: 0;
+  background: #000;
+}
+a:link, a:visited, a:hover {
+}
+h1 {
+}
+
+/**************
+* VIDEOS
+**************/
+#videos {
+}
+#selected_video {
+    width: 600px;
+    height: 350px;
+    position: absolute;
+    right: 100px;
+    top: 100px;
+}

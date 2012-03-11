@@ -2,17 +2,19 @@ import math
 from datetime import datetime
 from collections import defaultdict
 
-from store import (HourSet, UserLinkSet, UserProperty,
+from watchlinks.store import (HourSet, UserLinkSet, UserProperty, r,
         LANG, FOLLOWERS, TIMEZONE, STORAGE_PREFIX)
 
 def stripped_lines(f):
     return set(filter(None, map(lambda x: x.strip(), f.readlines())))
 
-with open('en_timezones.txt', 'r') as tz_file:
-    EN_TIMEZONES = stripped_lines(tz_file)
-
-with open('all_timezones.txt', 'r') as tz_file:
-    ALL_TIMEZONES = stripped_lines(tz_file)
+EN_TIMEZONES = ['Adelaide', 'Alaska', 'Amsterdam', 'Arizona',
+    'Atlantic Time (Canada)', 'Auckland', 'Brisbane', 'Brussels', 'Canberra',
+    'Indiana (East)', 'London', 'Melbourne', 'Mountain Time (US & Canada)',
+    'Newfoundland', 'Pacific Time (US & Canada)', 'Perth', 'Pretoria',
+    'Saskatchewan', 'Sydney', 'Wellington', 'Central Time (US & Canada)',
+    'Darwin', 'Dublin', 'Eastern Time (US & Canada)', 'Edinburgh',
+    'Georgetown']
 
 def language_score(timezone, lang):
     if timezone in EN_TIMEZONES:
@@ -58,3 +60,15 @@ def scores_for_dt(dt):
     u = UserLinkSet(dt)
     user_links = map(UserLink, u.all())
     return scores(user_links)
+
+def remove_yt(dt):
+    u = UserLinkSet(dt)
+    for ul in u.all():
+        try:
+            user_id, link = ul.split(':')
+        except ValueError:
+            r.srem(u.key, ul)
+        else:
+            if not link.isdigit():
+                r.srem(u.key, ul)
+

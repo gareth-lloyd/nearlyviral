@@ -1,27 +1,6 @@
-Adelaide
-Alaska
-Amsterdam
-Arizona
-Atlantic Time (Canada)
-Auckland
-Brisbane
-Brussels
-Canberra
-Indiana (East)
-London
-Melbourne
-Mid-Atlantic
-Mountain Time (US & Canada)
-Newfoundland
-Pacific Time (US & Canada)
-Perth
-Pretoria
-Saskatchewan
-Sydney
-Wellington
-Central Time (US & Canada)
-Darwin
-Dublin
-Eastern Time (US & Canada)
-Edinburgh
-Georgetown
+['Adelaide', 'Alaska', 'Amsterdam', 'Arizona', 'Atlantic Time (Canada)',
+'Auckland, Brisbane', 'Brussels', 'Canberra', 'Indiana (East)', 'London',
+'Melbourne', 'Mid-Atlantic, Mountain Time (US & Canada)', 'Newfoundland',
+'Pacific Time (US & Canada)', 'Perth, Pretoria', 'Saskatchewan', 'Sydney',
+'Wellington', 'Central Time (US & Canada)', 'Darwin, Dublin', 
+'Eastern Time (US & Canada)', 'Edinburgh', 'Georgetown,']

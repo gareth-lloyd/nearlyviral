@@ -1,15 +1,10 @@
-from redis import Redis
 import settings
+from redis_connection import r, _key
 
 STORAGE_PREFIX = 'LKS'
 LANG = 'LNG'
 FOLLOWERS = 'FOL'
 TIMEZONE = 'TZ'
-
-r = Redis(db=settings.REDIS_DB)
-
-def _key(*parts):
-    return ':'.join(parts)
 
 class UserProperty(object):
     def __init__(self, prefix):

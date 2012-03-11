@@ -2,59 +2,33 @@ from urlparse import urlparse
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-from store import HourSet
+from watchlinks.store import UserLinkSet
+from watchlinks.score import UserLink
 
-def most_popular(hours=6):
-    from watch import STORAGE_PREFIX
+def most_popular(hours=3):
     link_scores = defaultdict(int)
     for h in range(hours):
-        hs = HourSet(STORAGE_PREFIX, datetime.now() - timedelta(hours=h))
-        for link, score in hs.popular():
-            link_scores[link] += (hours - h) * score
+        hs = UserLinkSet(datetime.now() - timedelta(hours=h))
+        user_links = map(UserLink, hs.all())
+        for user_link in user_links:
+            link_scores[user_link.identifier] += user_link.score()
 
     return reversed(sorted(link_scores.iteritems(), key=lambda item: item[1]))
 
-def get_query_arg(query, arg):
-    for segment in query.split('&'):
-        try:
-            key, value = segment.split('=')
-        except ValueError:
-            continue
-        if key == arg:
-            return value
-    raise KeyError
-
-def vid_identifier(url):
+def vimeo_id(url):
+    """
+    """
     url = url or ''
     scheme, domain, path, params, query, fragment = urlparse(url)
     domain = domain.lower()
 
-    if domain in('youtube.com', 'www.youtube.com'):
-        try:
-            return get_query_arg(query, 'v')
-        except KeyError:
-            if path.startswith('/v/'):
-                return path.strip('v/')
+    if domain in ('vimeo.com', 'www.vimeo.com', 'player.vimeo.com'):
+        for path_segment in path.split('/'):
+            if path_segment.isdigit():
+                return path_segment
 
-    elif domain == 'youtu.be':
-        return path.lstrip('/')
-
-    elif domain == 'm.youtube.com':
-        if fragment:
-            try:
-                return get_query_arg(fragment.split('?')[1], 'v')
-            except KeyError:
-                pass
-        if query:
-            try:
-                return get_query_arg(query, 'v')
-            except KeyError:
-                pass
-
-    elif domain in ('vimeo.com', 'www.vimeo.com'):
-        path = path.lstrip('/m')
-        if path.isdigit():
-            return path
+        if fragment.isdigit():
+            return fragment
 
     return False
 
