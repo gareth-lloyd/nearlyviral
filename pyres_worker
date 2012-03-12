@@ -1,0 +1,9 @@
+#!/Users/garethlloyd/.virtualenvs/twitterlinks/bin/python
+# EASY-INSTALL-ENTRY-SCRIPT: 'pyres==1.1','console_scripts','pyres_worker'
+__requires__ = 'pyres==1.1'
+import sys
+from pkg_resources import load_entry_point
+
+sys.exit(
+   load_entry_point('pyres==1.1', 'console_scripts', 'pyres_worker')()
+)

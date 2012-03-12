@@ -7,3 +7,4 @@ beautifulsoup
 oauth
 redis
 nosexunit
+pyres

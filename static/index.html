@@ -15,11 +15,10 @@
         <div class="video_title">
             {{title}}
         </div>
-        <div class="video_player">
-            <iframe src="http://player.vimeo.com/video/{{id}}" width="400" height="200" frameborder="0"></iframe>
-        </div>
-        <div class="video_description">
-            {{description}}
+        <div class="video_img">
+            <a href="#{{id}}" />
+                <img src="{{thumbnail_medium}}" />
+            </a>
         </div>
     </script>
     <script type='text/html' id='selected_video_template'>

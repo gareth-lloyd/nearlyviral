@@ -4,6 +4,14 @@ var Video = Backbone.Model.extend({
 var VideoView = Backbone.View.extend({
     className: 'video',
 
+    events: {
+        'click .video_img': 'selected'
+    },
+
+    selected: function() {
+        selectedVideoView.setModel(this.model);
+    },
+
     initialize: function() {
         this.model.bind('change', this.render, this);
     },
@@ -11,6 +19,20 @@ var VideoView = Backbone.View.extend({
     render: function() {
         var attrs = this.model.toJSON();
         $(this.el).append(ich.video_template(attrs));
+        return this;
+    }
+});
+var SelectedVideoView = Backbone.View.extend({
+    className: 'selectedvideo',
+
+    setModel: function(model) {
+        this.model = model;
+        this.render();
+    },
+
+    render: function() {
+        var attrs = this.model.toJSON();
+        $(this.el).empty().append(ich.selected_video_template(attrs));
         return this;
     }
 });
@@ -43,4 +65,5 @@ $(function() {
     var videos = new Videos();
     videos.fetch();
     var videosView = new VideosView({collection: videos, el: $('#videos')[0]});
+    selectedVideoView = new SelectedVideoView({el: $('#selected_video')[0]});
 });

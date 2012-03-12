@@ -12,12 +12,15 @@ h1 {
 /**************
 * VIDEOS
 **************/
+#container {
+    position: relative;
+}
 #videos {
 }
 #selected_video {
     width: 600px;
     height: 350px;
-    position: absolute;
+    position: fixed;
     right: 100px;
     top: 100px;
 }

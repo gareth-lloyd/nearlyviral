@@ -1,9 +1,13 @@
 from datetime import datetime
 from twistedstream import protocol
+from pyres import ResQ
 
 from watchlinks.store import (HourSet, UserLinkSet, UserProperty,
         LANG, FOLLOWERS, TIMEZONE, STORAGE_PREFIX)
+from metadata.store import FetchVimeoDataTask
 from watchlinks.analyze import vimeo_id
+
+resq = ResQ()
 
 def user_linked_before(identifier, user_id):
     link_set = UserLinkSet(datetime.now())
@@ -28,6 +32,9 @@ class LinkReceiver(protocol.IStreamReceiver):
 
                 lang = json_obj['user']['lang']
                 UserProperty(LANG).set(user_id, lang)
+
+                resq.enqueue(FetchVimeoDataTask, identifier)
+                print identifier
 
         except Exception,e :
             print e
