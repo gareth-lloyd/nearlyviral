@@ -32,27 +32,25 @@ class VimeoMetadata(object):
     def _from_api(self):
         data_dict = vimeo.vimeo_data(self.vimeo_id)
         rc.conn.set(self.key, json.dumps(data_dict))
-        return data_dict
+        self._populate(data_dict)
+
+    def _populate(self, data):
+        self.__dict__.update(data)
 
     def load(self):
         try:
             data = self._from_store()
         except NotFoundException:
             data = self._from_api()
-        self.__dict__.update(data)
+        self._populate(data)
         return self
 
     def load_if_present(self):
         """Raises NotFoundException if not already stored.
         """
         data = self._from_store()
-        self.__dict__.update(data)
+        self._populate(data)
         return self
-
-    def queue_load(self):
-        """Enqueue a task to load this metadata from the api,
-        and store it."""
-        pass
 
     def likes_over_plays(self):
         try:
@@ -124,11 +122,12 @@ class FetchVimeoDataTask(object):
     @staticmethod
     def perform(vimeo_id):
         try:
-            metadata = VimeoMetadata(vimeo_id)._from_api()
+            metadata = VimeoMetadata(vimeo_id)
+            metadata._from_api()
             SortedProperty(COMMENTS_OVER_PLAYS).add_or_update(vimeo_id, metadata.comments_over_plays())
             SortedProperty(LIKES_OVER_PLAYS).add_or_update(vimeo_id, metadata.likes_over_plays())
-            SortedProperty(PLAYS).add_or_update(vimeo_id, metadata.stats_number_of_plays())
-        except vimeo.InvalidvimeoId:
+            SortedProperty(PLAYS).add_or_update(vimeo_id, metadata.stats_number_of_plays)
+        except vimeo.InvalidVideoId:
             print 'invalid vimeo id'
             return
         except vimeo.ApiCallFailed:

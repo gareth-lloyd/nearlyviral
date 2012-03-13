@@ -30,9 +30,13 @@ class LinkReceiver(protocol.IStreamReceiver):
         try:
             user_id = json_obj['user']['id_str']
             for url_info in json_obj['entities']['urls']:
-                vimeo_id = vimeo_id_from_url(url_info['expanded_url'])
-                if not vimeo_id or user_linked_before(vimeo_id, user_id):
-                    print 'No vid link %s' % url_info['expanded_url']
+                url = url_info['expanded_url']
+                vimeo_id = vimeo_id_from_url(url)
+                if not vimeo_id:
+                    print 'No vid link %s' % url
+                    continue
+                if user_linked_before(vimeo_id, user_id):
+                    print 'multiple links by %s to %s' % (user_id, url)
                     continue
 
                 followers = json_obj['user']['followers_count']
