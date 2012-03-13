@@ -6,6 +6,10 @@ from metadata import vimeo
 from redis_connection import _key
 import redis_connection as rc
 
+PLAYS = 'PLS'
+LIKES_OVER_PLAYS = 'LOP'
+COMMENTS_OVER_PLAYS = 'LOC'
+
 resq = ResQ()
 
 class NotFoundException(Exception):
@@ -68,9 +72,35 @@ class VimeoMetadata(object):
         except AttributeError:
             raise NotFoundException
 
-class MetaDataFetchTimes(object):
-    KEY = 'LMF'
 
+class SortedProperty(object):
+    """Thin wrapper round a redis sorted set to store a numeric
+    property of a video.
+    """
+    def __init__(self, key):
+        self.key = key
+
+    def increment(self, member, score=1.0):
+        rc.conn.zincrby(self.key, member, score)
+
+    def add_or_update(self, member, score=1.0):
+        rc.conn.zadd(self.key, member, score)
+
+    def member_score(self, member):
+        return rc.conn.zscore(self.key, member)
+
+    def top(self, limit=20):
+        return rc.conn.zrevrange(self.key, 0, limit, withscores=True)
+
+    def bottom(self, limit=20):
+        return rc.conn.zrange(self.key, 0, limit, withscores=True)
+
+
+class MetaDataFetchTimes(object):
+    """Very thin wrapper round a redis sorted set to store the last
+    time we fetched data for a particular vimeo video.
+    """
+    KEY = 'LMF'
     @staticmethod
     def get(vimeo_id):
         return rc.conn.zscore(MetaDataFetchTimes.KEY, vimeo_id)
@@ -87,13 +117,17 @@ def maybe_fetch_metadata(vimeo_id):
         MetaDataFetchTimes.set(vimeo_id, now)
         resq.enqueue(FetchVimeoDataTask, vimeo_id)
 
+
 class FetchVimeoDataTask(object):
     queue = 'vimeo'
 
     @staticmethod
     def perform(vimeo_id):
         try:
-            VimeoMetadata(vimeo_id)._from_api()
+            metadata = VimeoMetadata(vimeo_id)._from_api()
+            SortedProperty(COMMENTS_OVER_PLAYS).add_or_update(vimeo_id, metadata.comments_over_plays())
+            SortedProperty(LIKES_OVER_PLAYS).add_or_update(vimeo_id, metadata.likes_over_plays())
+            SortedProperty(PLAYS).add_or_update(vimeo_id, metadata.stats_number_of_plays())
         except vimeo.InvalidvimeoId:
             print 'invalid vimeo id'
             return

@@ -1,15 +1,10 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-from gather.store import VideoProperty, UserLinkSet, HourSet, ENGLISH_LINKS
-from metadata.store import VimeoMetadata
+from gather.store import HourSet, ENGLISH_LINKS
+from metadata.store import (SortedProperty, PLAYS, LIKES_OVER_PLAYS,
+        COMMENTS_OVER_PLAYS)
 
-PLAYS = 'PLS'
-LIKES_OVER_PLAYS = 'LOP'
-COMMENTS_OVER_PLAYS = 'LOC'
-comments = VideoProperty(COMMENTS_OVER_PLAYS)
-likes = VideoProperty(LIKES_OVER_PLAYS)
-plays = VideoProperty(PLAYS)
 
 EN_TIMEZONES = ['Adelaide', 'Alaska', 'Amsterdam', 'Arizona',
     'Atlantic Time (Canada)', 'Auckland', 'Brisbane', 'Hawaii', 'Canberra',
@@ -26,28 +21,16 @@ def english_speaking(timezone, lang, text):
     build something better at detecting language later. """
     return 1 if timezone in EN_TIMEZONES else 0
 
-def set_vimeo_properties():
-    from metadata.vimeo import InvalidVideoId
-    for user_link in UserLinkSet().all():
-        _, vimeo_id = user_link.split(':')
-        try:
-            metadata = VimeoMetadata(vimeo_id).load()
-        except InvalidVideoId:
-            print 'vimeo id %s is invalid' % vimeo_id
-            continue
-        print metadata
-        comments.update(vimeo_id, metadata.comments_over_plays())
-        likes.update(vimeo_id, metadata.likes_over_plays())
-        plays.update(vimeo_id, metadata.stats_number_of_plays)
-
 def top_scoring(hours=8):
+    likes = SortedProperty(LIKES_OVER_PLAYS)
+    comments = SortedProperty(COMMENTS_OVER_PLAYS)
+    plays = SortedProperty(PLAYS)
+
     id_links = defaultdict(float)
     for hour in range(hours):
         h = HourSet(ENGLISH_LINKS, datetime.now() - timedelta(hours=hour))
-        for vimeo_id, links in h.popular(100):
+        for vimeo_id, links in h.top(100):
             id_links[vimeo_id] += links
-
-    print list(reversed(sorted(id_links.iteritems(), key=lambda x: x[1])))[:20]
 
     final_scores = {}
     for vimeo_id, num_links in id_links.iteritems():
@@ -55,8 +38,6 @@ def top_scoring(hours=8):
             multiplier = (likes.member_score(vimeo_id) +
                     100 * comments.member_score(vimeo_id))
             final_scores[vimeo_id] = multiplier * num_links
-            print 'links before',num_links, 'links after', multiplier * num_links
-    print len(final_scores)
 
     return list(reversed(sorted(final_scores.items(), key=lambda x: x[1])))[:20]
 
