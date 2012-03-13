@@ -1,74 +1,63 @@
-import math
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime, timedelta
 
-from watchlinks.store import (HourSet, UserLinkSet, UserProperty, r,
-        LANG, FOLLOWERS, TIMEZONE, STORAGE_PREFIX)
+from gather.store import VideoProperty, UserLinkSet, HourSet, ENGLISH_LINKS
+from metadata.store import VimeoMetadata
+from redis_connection import r
 
-def stripped_lines(f):
-    return set(filter(None, map(lambda x: x.strip(), f.readlines())))
+PLAYS = 'PLS'
+LIKES_OVER_PLAYS = 'LOP'
+COMMENTS_OVER_PLAYS = 'LOC'
+comments = VideoProperty(COMMENTS_OVER_PLAYS)
+likes = VideoProperty(LIKES_OVER_PLAYS)
+plays = VideoProperty(PLAYS)
 
 EN_TIMEZONES = ['Adelaide', 'Alaska', 'Amsterdam', 'Arizona',
-    'Atlantic Time (Canada)', 'Auckland', 'Brisbane', 'Brussels', 'Canberra',
+    'Atlantic Time (Canada)', 'Auckland', 'Brisbane', 'Hawaii', 'Canberra',
     'Indiana (East)', 'London', 'Melbourne', 'Mountain Time (US & Canada)',
     'Newfoundland', 'Pacific Time (US & Canada)', 'Perth', 'Pretoria',
     'Saskatchewan', 'Sydney', 'Wellington', 'Central Time (US & Canada)',
     'Darwin', 'Dublin', 'Eastern Time (US & Canada)', 'Edinburgh',
     'Georgetown']
 
-def language_score(timezone, lang):
-    if timezone in EN_TIMEZONES:
-        return 15
-    return 0
+def english_speaking(timezone, lang, text):
+    """No offense intended to non-English speakers, but I found links that were
+    of more interest to me by filtering on the presumed first language of the
+    person that's linking. This is a very unreliable way of doing this. Might
+    build something better at detecting language later. """
+    return 1 if timezone in EN_TIMEZONES else 0
 
-class UserLink(object):
-    def __init__(self, user_link_key):
-        self.user_id, self.identifier = user_link_key.split(':')
-        user_followers = UserProperty(FOLLOWERS).get(self.user_id)
-        if user_followers == 'None':
-            self.user_followers = 0
-        else:
-            self.user_followers = int(user_followers)
-
-        self.timezone = UserProperty(TIMEZONE).get(self.user_id)
-        self.lang = UserProperty(LANG).get(self.user_id)
-
-        if self.identifier.isdigit():
-            self.type = 'vimeo'
-        else:
-            self.type = 'youtube'
-
-    def score(self):
-        return (
-            math.log(self.user_followers) if self.user_followers else 0 +
-            language_score(self.timezone, self.lang)
-        )
-
-
-def make_user_links(dt):
-    user_link_set = UserLinkSet(dt)
-    return map(UserLink, user_link_set.all())
-
-def scores(user_links):
-    id_scores = defaultdict(int)
-    for user_link in user_links:
-        id_scores[user_link.identifier] += user_link.score()
-
-    return list(reversed(sorted(id_scores.iteritems(), key=lambda x: x[1])))
-
-def scores_for_dt(dt):
-    u = UserLinkSet(dt)
-    user_links = map(UserLink, u.all())
-    return scores(user_links)
-
-def remove_yt(dt):
-    u = UserLinkSet(dt)
-    for ul in u.all():
+def set_vimeo_properties():
+    from metadata.vimeo import InvalidVideoId
+    for user_link in UserLinkSet().all():
+        _, vimeo_id = user_link.split(':')
         try:
-            user_id, link = ul.split(':')
-        except ValueError:
-            r.srem(u.key, ul)
-        else:
-            if not link.isdigit():
-                r.srem(u.key, ul)
+            metadata = VimeoMetadata(vimeo_id).load()
+        except InvalidVideoId:
+            print 'vimeo id %s is invalid' % vimeo_id
+            continue
+        print metadata
+        comments.update(vimeo_id, metadata.comments_over_plays())
+        likes.update(vimeo_id, metadata.likes_over_plays())
+        plays.update(vimeo_id, metadata.stats_number_of_plays)
+
+def top_scoring(hours=8):
+    id_links = defaultdict(float)
+    for hour in range(hours):
+        h = HourSet(ENGLISH_LINKS, datetime.now() - timedelta(hours=hour))
+        for vimeo_id, links in h.popular(100):
+            id_links[vimeo_id] += links
+
+    print list(reversed(sorted(id_links.iteritems(), key=lambda x: x[1])))[:20]
+
+    final_scores = {}
+    for vimeo_id, num_links in id_links.iteritems():
+        if 100 < plays.member_score(vimeo_id) < 10000:
+            multiplier = (likes.member_score(vimeo_id) +
+                    100 * comments.member_score(vimeo_id))
+            final_scores[vimeo_id] = multiplier * num_links
+            print 'links before',num_links, 'links after', multiplier * num_links
+    print len(final_scores)
+
+    return list(reversed(sorted(final_scores.items(), key=lambda x: x[1])))[:20]
 

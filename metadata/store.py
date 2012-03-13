@@ -1,8 +1,9 @@
 import json
+import settings
 from datetime import datetime, timedelta
 
 from metadata import vimeo
-from watchlinks.store import UserLinkSet
+from gather.store import UserLinkSet
 
 from redis_connection import r, _key
 
@@ -32,10 +33,7 @@ class VimeoMetadata(object):
         try:
             data = self._from_store()
         except NotFoundException:
-            try:
-                data = self._from_api()
-            except vimeo.InvalidVideoId:
-                return
+            data = self._from_api()
         self.__dict__.update(data)
         return self
 
@@ -50,6 +48,24 @@ class VimeoMetadata(object):
         and store it."""
         pass
 
+    def likes_over_plays(self):
+        try:
+            if not self.stats_number_of_plays:
+                return 0
+            else:
+                return float(self.stats_number_of_likes) / self.stats_number_of_plays
+        except AttributeError:
+            raise NotFoundException
+
+    def comments_over_plays(self):
+        try:
+            if not self.stats_number_of_plays:
+                return 0
+            else:
+                return float(self.stats_number_of_likes) / self.stats_number_of_plays
+        except AttributeError:
+            raise NotFoundException
+
 class FetchVimeoDataTask(object):
     queue = 'vimeo'
 
@@ -63,27 +79,3 @@ class FetchVimeoDataTask(object):
         except ApiCallFailed:
             raise
 
-class VideosProperty(object):
-    def __init__(self, key):
-        self.key = key
-
-    def update(self, member, score):
-        r.zadd(self.key, member, float(score))
-
-    def get_score(self, member):
-        return r.zscore(self.key, member)
-
-
-def ids(hours=4):
-    all_ids = set()
-    for x in range(hours):
-        dt = datetime.now() - timedelta(hours=hours)
-        u = UserLinkSet(dt)
-        all_ids.update([ul.split(':')[1] for ul in u.all()])
-    return all_ids
-
-def store_metadata_for_id(video_id):
-    data = VimeoMetadata(video_id).load()
-    VideosProperty('likes').update(video_id, data.stats_number_of_likes)
-    VideosProperty('plays').update(video_id, data.stats_number_of_plays)
-    VideosProperty('comments').update(video_id, data.stats_number_of_comments)

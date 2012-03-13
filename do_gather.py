@@ -1,4 +1,4 @@
-from watchlinks.watch import LinkReceiver
+from gather import LinkReceiver
 from twisted.internet import reactor
 
 from oauth import oauth

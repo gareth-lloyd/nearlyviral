@@ -1,45 +1,54 @@
+from datetime import datetime
 import settings
 from redis_connection import r, _key
 
-STORAGE_PREFIX = 'LKS'
-LANG = 'LNG'
-FOLLOWERS = 'FOL'
-TIMEZONE = 'TZ'
-
-class UserProperty(object):
-    def __init__(self, prefix):
-        self.prefix = prefix
-
-    def get(self, user_id):
-        return r.get(_key(self.prefix, str(user_id)))
-
-    def set(self, user_id, property):
-        if property is None:
-            property = 'None'
-        r.set(_key(self.prefix, str(user_id)), property)
+ENGLISH_LINKS = 'ENL'
+NON_ENGLISH_LINKS = 'NEL'
+TOTAL_AUDIENCE = 'AUD'
 
 class UserLinkSet(object):
-    PREFIX = 'UL'
-    def __init__(self, dt):
-        self.key = _key(self.PREFIX, dt.strftime('%Y%m%d%H'))
+    KEY = 'UL'
 
     def update(self, user_id, identifier):
         """Returns 1 if the user has not linked before, and we
         therefore recorded the link, otherwise 0.
         """
-        return r.sadd(self.key, _key(str(user_id), identifier))
+        return r.sadd(self.KEY, _key(str(user_id), identifier))
 
     def all(self):
-        return r.smembers(self.key)
+        return r.smembers(self.KEY)
 
 class HourSet(object):
-    def __init__(self, prefix, dt):
+    def __init__(self, prefix, dt=None):
+        if dt is None:
+            dt = datetime.now()
         self.key = _key(prefix, dt.strftime('%Y%m%d%H'))
 
-    def update(self, url):
-        if not url:
+    def update(self, identifier, score=1.0):
+        if not identifier:
             return
-        r.zincrby(self.key, url, 1.0)
+        r.zincrby(self.key, identifier, score)
 
-    def popular(self):
-        return r.zrevrange(self.key, 0, 20, withscores=True)
+    def member_score(self, identifier):
+        return r.zscore(self.key, identifier)
+
+    def popular(self, limit=20):
+        return r.zrevrange(self.key, 0, limit, withscores=True)
+
+class VideoProperty(object):
+    def __init__(self, key, dt=None):
+        self.key = key
+
+    def update(self, identifier, score=1.0):
+        if not identifier:
+            return
+        r.zadd(self.key, identifier, score)
+
+    def member_score(self, identifier):
+        return r.zscore(self.key, identifier)
+
+    def top(self, limit=20):
+        return r.zrevrange(self.key, 0, limit, withscores=True)
+
+    def bottom(self, limit=20):
+        return r.zrange(self.key, 0, limit, withscores=True)
