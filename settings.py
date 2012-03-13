@@ -5,5 +5,6 @@ TWITTER_APP_ACCESS_TOKEN = ''
 TWITTER_APP_ACCESS_TOKEN_SECRET = ''
 
 REDIS_DB = 0
+TEST_REDIS_DB = 1
 
 from local_settings import *

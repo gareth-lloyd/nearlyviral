@@ -1,5 +1,5 @@
 from unittest import TestCase
-from watchlinks.analyze import vimeo_id
+from gather import vimeo_id_from_url
 
 TEST_DATA = {
     'https://vimeo.com/38221464': '38221464',
@@ -19,7 +19,7 @@ class UrlRecognitionTests(TestCase):
 
     def test_vid_identifier(self):
         def test(url_id):
-            url, identifier = url_id[0], url_id[1]
-            self.assertEquals(identifier, vimeo_id(url))
+            url, vimeo_id= url_id[0], url_id[1]
+            self.assertEquals(vimeo_id, vimeo_id_from_url(url))
 
         map(test, TEST_DATA.iteritems())

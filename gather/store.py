@@ -1,6 +1,6 @@
 from datetime import datetime
-import settings
-from redis_connection import r, _key
+from redis_connection import _key
+import redis_connection as rc
 
 ENGLISH_LINKS = 'ENL'
 NON_ENGLISH_LINKS = 'NEL'
@@ -13,10 +13,10 @@ class UserLinkSet(object):
         """Returns 1 if the user has not linked before, and we
         therefore recorded the link, otherwise 0.
         """
-        return r.sadd(self.KEY, _key(str(user_id), identifier))
+        return rc.conn.sadd(self.KEY, _key(str(user_id), identifier))
 
     def all(self):
-        return r.smembers(self.KEY)
+        return rc.conn.smembers(self.KEY)
 
 class HourSet(object):
     def __init__(self, prefix, dt=None):
@@ -27,13 +27,13 @@ class HourSet(object):
     def update(self, identifier, score=1.0):
         if not identifier:
             return
-        r.zincrby(self.key, identifier, score)
+        rc.conn.zincrby(self.key, identifier, score)
 
     def member_score(self, identifier):
-        return r.zscore(self.key, identifier)
+        return rc.conn.zscore(self.key, identifier)
 
     def popular(self, limit=20):
-        return r.zrevrange(self.key, 0, limit, withscores=True)
+        return rc.conn.zrevrange(self.key, 0, limit, withscores=True)
 
 class VideoProperty(object):
     def __init__(self, key, dt=None):
@@ -42,13 +42,13 @@ class VideoProperty(object):
     def update(self, identifier, score=1.0):
         if not identifier:
             return
-        r.zadd(self.key, identifier, score)
+        rc.conn.zadd(self.key, identifier, score)
 
     def member_score(self, identifier):
-        return r.zscore(self.key, identifier)
+        return rc.conn.zscore(self.key, identifier)
 
     def top(self, limit=20):
-        return r.zrevrange(self.key, 0, limit, withscores=True)
+        return rc.conn.zrevrange(self.key, 0, limit, withscores=True)
 
     def bottom(self, limit=20):
-        return r.zrange(self.key, 0, limit, withscores=True)
+        return rc.conn.zrange(self.key, 0, limit, withscores=True)

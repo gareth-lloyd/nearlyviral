@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 
 from gather.store import VideoProperty, UserLinkSet, HourSet, ENGLISH_LINKS
 from metadata.store import VimeoMetadata
-from redis_connection import r
 
 PLAYS = 'PLS'
 LIKES_OVER_PLAYS = 'LOP'

@@ -1,17 +1,16 @@
 from datetime import datetime
 from twistedstream import protocol
-from pyres import ResQ
 from urlparse import urlparse
+from metadata.store import maybe_fetch_metadata
 
 from gather.store import (HourSet, UserLinkSet,
         ENGLISH_LINKS, NON_ENGLISH_LINKS, TOTAL_AUDIENCE)
 from gather.score import english_speaking
 
 
-resq = ResQ()
 link_set = UserLinkSet()
 
-def vimeo_id(url):
+def vimeo_id_from_url(url):
     url = url or ''
     scheme, domain, path, params, query, fragment = urlparse(url)
 
@@ -23,39 +22,31 @@ def vimeo_id(url):
             return fragment
     return False
 
-def user_linked_before(identifier, user_id):
-    return not link_set.update(user_id, identifier)
-
-def maybe_fetch_data(identifier):
-    from metadata.store import (FetchVimeoDataTask, VimeoMetadata,
-                NotFoundException)
-    try:
-        VimeoMetadata(identifier).load_if_present()
-    except NotFoundException:
-        resq.enqueue(FetchVimeoDataTask, identifier)
+def user_linked_before(vimeo_id, user_id):
+    return not link_set.update(user_id, vimeo_id)
 
 class LinkReceiver(protocol.IStreamReceiver):
     def status(self, json_obj):
         try:
             user_id = json_obj['user']['id_str']
             for url_info in json_obj['entities']['urls']:
-                identifier = vimeo_id(url_info['expanded_url'])
-                if not identifier or user_linked_before(identifier, user_id):
+                vimeo_id = vimeo_id_from_url(url_info['expanded_url'])
+                if not vimeo_id or user_linked_before(vimeo_id, user_id):
                     print 'No vid link %s' % url_info['expanded_url']
                     continue
 
                 followers = json_obj['user']['followers_count']
 
-                HourSet(TOTAL_AUDIENCE).update(identifier, followers)
+                HourSet(TOTAL_AUDIENCE).update(vimeo_id, followers)
 
                 timezone = json_obj['user']['time_zone']
                 lang = json_obj['user']['lang']
                 text = json_obj['text']
                 if english_speaking(timezone, lang, text):
-                    HourSet(ENGLISH_LINKS).update(identifier)
+                    HourSet(ENGLISH_LINKS).update(vimeo_id)
                 else:
-                    HourSet(NON_ENGLISH_LINKS).update(identifier)
-                maybe_fetch_data(identifier)
+                    HourSet(NON_ENGLISH_LINKS).update(vimeo_id)
+                maybe_fetch_metadata(vimeo_id)
 
         except Exception,e :
             print e
