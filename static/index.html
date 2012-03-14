@@ -12,12 +12,10 @@
     <script src="/static/js/links.js" type="text/javascript"></script>
 
     <script type='text/html' id='video_template'>
-        <div class="video_title">
-            {{title}}
-        </div>
+        <h2>{{title}}</h2>
         <div class="video_img">
             <a href="#{{id}}" />
-                <img src="{{thumbnail_medium}}" />
+                <img src="{{thumbnail_large}}" />
             </a>
         </div>
     </script>
@@ -25,18 +23,24 @@
         <div class="video_player">
             <iframe 
                 src="http://player.vimeo.com/video/{{id}}"
-                width="600" height="350"
+                width="800" height="450"
                 frameborder="0">
             </iframe>
         </div>
     </script>
 </head>
 <body>
-    <h1>What's Twitter Watching?</h1>
-
-    <div id="videos">
-    </div>
     <div id="selected_video">
+    </div>
+    <div id="container">
+        <div id="explanation">
+            </p>
+            We see every Vimeo link on Twitter as it happens and use a few tricks
+            to filter them down to this highly interesting list:
+            </p>
+        </div>
+        <div id="videos">
+        </div>
     </div>
 </body>
 </html>

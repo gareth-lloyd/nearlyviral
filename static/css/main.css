@@ -1,8 +1,7 @@
 body {
-  color: #EEE;
   font: .9em helvetica, verdana, arial, sans-serif;
   margin: 0;
-  background: #000;
+  background: #FFF;
 }
 a:link, a:visited, a:hover {
 }
@@ -14,13 +13,27 @@ h1 {
 **************/
 #container {
     position: relative;
+    width: 700px;
+    margin: 10px auto;
+}
+#explanation {
+    font-size: 3em;
+    font-weight: bold;
+    color: #777;
+    margin: 0 0 10px;
 }
 #videos {
+    background: #ddd;
+    text-align: center;
+}
+.video {
+    padding: 20px 0;
 }
 #selected_video {
-    width: 600px;
-    height: 350px;
+    z-index: 1;
+    width: 800px;
+    height: 450px;
     position: fixed;
-    right: 100px;
-    top: 100px;
+    left: 0;
+    top: 20%;
 }
