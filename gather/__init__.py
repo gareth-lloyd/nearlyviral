@@ -47,10 +47,10 @@ class LinkReceiver(protocol.IStreamReceiver):
                 lang = json_obj['user']['lang']
                 text = json_obj['text']
                 if english_speaking(timezone, lang, text):
+                    maybe_fetch_metadata(vimeo_id)
                     HourSet(ENGLISH_LINKS).increment(vimeo_id)
                 else:
                     HourSet(NON_ENGLISH_LINKS).increment(vimeo_id)
-                maybe_fetch_metadata(vimeo_id)
 
         except Exception,e :
             print e

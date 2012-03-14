@@ -1,5 +1,4 @@
 import json
-from datetime import date
 
 from gather.score import top_scoring
 from metadata.store import VimeoMetadata

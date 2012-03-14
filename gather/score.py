@@ -1,10 +1,13 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
+import math
 
-from gather.store import HourSet, ENGLISH_LINKS
-from metadata.store import (SortedProperty, PLAYS, LIKES_OVER_PLAYS,
-        COMMENTS_OVER_PLAYS)
+from gather.store import HourSet, ENGLISH_LINKS, NON_ENGLISH_LINKS
+from metadata.store import SortedProperty, PLAYS, LIKES_OVER_PLAYS
 
+LIKES = SortedProperty(LIKES_OVER_PLAYS)
+PLAYS = SortedProperty(PLAYS)
+HOURS_BACK = 6
 
 EN_TIMEZONES = ['Adelaide', 'Alaska', 'Amsterdam', 'Arizona',
     'Atlantic Time (Canada)', 'Auckland', 'Brisbane', 'Hawaii', 'Canberra',
@@ -21,23 +24,28 @@ def english_speaking(timezone, lang, text):
     build something better at detecting language later. """
     return 1 if timezone in EN_TIMEZONES else 0
 
-def top_scoring(hours=8):
-    likes = SortedProperty(LIKES_OVER_PLAYS)
-    comments = SortedProperty(COMMENTS_OVER_PLAYS)
-    plays = SortedProperty(PLAYS)
+def score(vimeo_id, num_links):
+    plays = PLAYS.member_score(vimeo_id) or 0
+    if 1000 < plays < 1000000:
+        multiplier = math.sqrt(LIKES.member_score(vimeo_id) or 0)
+        return num_links * multiplier
+    else:
+        return 0
 
+def link_counts(hours=HOURS_BACK):
     id_links = defaultdict(float)
     for hour in range(hours):
-        h = HourSet(ENGLISH_LINKS, datetime.now() - timedelta(hours=hour))
-        for vimeo_id, links in h.top(100):
-            id_links[vimeo_id] += links
+        en = HourSet(ENGLISH_LINKS, datetime.now() - timedelta(hours=hour))
+        nen = HourSet(NON_ENGLISH_LINKS, datetime.now() - timedelta(hours=hour))
+        for vimeo_id, links in en.top(50):
+            # add the english links plus a proportion of any other links
+            id_links[vimeo_id] += links + (0.3 * (nen.member_score(vimeo_id) or 0))
+    return id_links.iteritems()
 
-    final_scores = {}
-    for vimeo_id, num_links in id_links.iteritems():
-        if 100 < plays.member_score(vimeo_id) < 10000:
-            multiplier = (likes.member_score(vimeo_id) +
-                    100 * comments.member_score(vimeo_id))
-            final_scores[vimeo_id] = multiplier * num_links
+def top_scoring():
+    final_scores = [(vimeo_id, score(vimeo_id, num_links))
+            for vimeo_id, num_links in link_counts()]
+    return list(reversed(sorted(final_scores, key=lambda x: x[1])))[:20]
 
-    return list(reversed(sorted(final_scores.items(), key=lambda x: x[1])))[:20]
-
+def most_linked():
+    return list(reversed(sorted(link_counts(), key=lambda x: x[1])))[:20]

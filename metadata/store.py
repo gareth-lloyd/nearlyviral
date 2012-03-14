@@ -66,7 +66,7 @@ class VimeoMetadata(object):
             if not self.stats_number_of_plays:
                 return 0
             else:
-                return float(self.stats_number_of_likes) / self.stats_number_of_plays
+                return float(self.stats_number_of_comments) / self.stats_number_of_plays
         except AttributeError:
             raise NotFoundException
 
@@ -111,7 +111,7 @@ class MetaDataFetchTimes(object):
 def maybe_fetch_metadata(vimeo_id):
     now = time()
     last_fetch = MetaDataFetchTimes.get(vimeo_id)
-    if last_fetch is None or now - last_fetch > 3600:
+    if last_fetch is None or (now - last_fetch) > 3600:
         MetaDataFetchTimes.set(vimeo_id, now)
         resq.enqueue(FetchVimeoDataTask, vimeo_id)
 
