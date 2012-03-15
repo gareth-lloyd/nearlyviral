@@ -1,6 +1,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/lightModal.css" />
 
     <script src="/static/js/mustache.js" type="text/javascript"></script>
     <script src="/static/js/jquery.js" type="text/javascript"></script>
@@ -10,13 +11,22 @@
     <script src="/static/js/backbone.js" type="text/javascript"></script>
 
     <script src="/static/js/links.js" type="text/javascript"></script>
+    <script src="/static/js/jquery.lightModal.js"></script>
 
     <script type='text/html' id='video_template'>
         <h2>{{title}}</h2>
         <div class="video_img">
-            <a href="#{{id}}" />
+            <a id="modal_trigger_{{id}}" href="#modal_{{id}}" >
                 <img src="{{thumbnail_large}}" />
             </a>
+        </div>
+        <div id="modal_{{id}}" class="video_player">
+        <h2>{{title}}</h2>
+            <iframe 
+                src="http://player.vimeo.com/video/{{id}}"
+                width="800" height="450"
+                frameborder="0">
+            </iframe>
         </div>
     </script>
     <script type='text/html' id='selected_video_template'>
@@ -30,8 +40,8 @@
     </script>
 </head>
 <body>
-    <div id="selected_video">
-    </div>
+    <!--<div id="selected_video">
+    </div>-->
     <div id="container">
         <div id="explanation">
             </p>
