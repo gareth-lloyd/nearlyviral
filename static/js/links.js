@@ -4,12 +4,12 @@ var Video = Backbone.Model.extend({
 var VideoView = Backbone.View.extend({
     className: 'video',
 
-//    events: {
- //       'click .video_img': 'selected'
-  //  },
+    events: {
+        'click .video_img': 'selected'
+    },
 
     selected: function() {
-        selectedVideoView.setModel(this.model);
+        document.selectedVideoView.setModel(this.model);
     },
 
     initialize: function() {
@@ -31,18 +31,26 @@ var SelectedVideoView = Backbone.View.extend({
         this.render();
     },
 
+    events: {
+        'click .deselect_link': 'close'
+    },
+
     render: function() {
         var attrs = this.model.toJSON();
-        $(this.el).empty().append(ich.selected_video_template(attrs));
+        $(this.el).append(ich.overlay_template(attrs));
+        $('#overlay').show();
         return this;
+    },
+
+    close: function() {
+        $(this.el).empty();
+        $('#overlay').hide();
     }
 });
-
 var Videos = Backbone.Collection.extend({
     model: Video,
     url: '/videos/'
 });
-
 var VideosView = Backbone.View.extend({
     initialize: function() {
         this.videoViews = [];
@@ -63,13 +71,9 @@ var VideosView = Backbone.View.extend({
 });
 
 $(function() {
+    $('#overlay').hide();
     videos = new Videos();
     videos.fetch();
     var videosView = new VideosView({collection: videos, el: $('#videos')[0]});
-//    selectedVideoView = new SelectedVideoView({el: $('#selected_video')[0]});
-    videos.each(function(video) {
-        console.log($('#modal_trigger_' + video.get('id')))
-        console.log('#modal_trigger_' + video.get('id'))
-        $('#modal_trigger_' + video.get('id')).lightModal();
-    });
+    document.selectedVideoView = new SelectedVideoView({el: $('#overlay')[0]});
 });
