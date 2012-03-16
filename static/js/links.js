@@ -37,14 +37,15 @@ var SelectedVideoView = Backbone.View.extend({
 
     render: function() {
         var attrs = this.model.toJSON();
-        $(this.el).append(ich.overlay_template(attrs));
-        $('#overlay').show();
+        renderedTemplate = ich.selected_video_template(attrs); 
+        $(this.el).append(renderedTemplate);
+        $('#selected_video').show();
         return this;
     },
 
     close: function() {
         $(this.el).empty();
-        $('#overlay').hide();
+        $('#selected_video').hide();
     }
 });
 var Videos = Backbone.Collection.extend({
@@ -71,9 +72,9 @@ var VideosView = Backbone.View.extend({
 });
 
 $(function() {
-    $('#overlay').hide();
     videos = new Videos();
     videos.fetch();
     var videosView = new VideosView({collection: videos, el: $('#videos')[0]});
-    document.selectedVideoView = new SelectedVideoView({el: $('#overlay')[0]});
+
+    document.selectedVideoView = new SelectedVideoView({el: $('#selected_video')[0]});
 });

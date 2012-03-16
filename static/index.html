@@ -20,12 +20,14 @@
         </div>
     </script>
     <script type='text/html' id='selected_video_template'>
+        <div id="overlay">
+        </div>
         <div id="video_player_container">
-            <a href="#" class="deselect_link">Close</a>
+            <a  class="deselect_link">Close</a>
             <div class="video_player">
                 <iframe 
                     src="http://player.vimeo.com/video/{{id}}"
-                    width="700" height="450"
+                    width="760" height="360"
                     frameborder="0">
                 </iframe>
             </div>
@@ -34,7 +36,7 @@
 </head>
 
 <body>
-    <div id="overlay">
+    <div id="selected_video">
     </div>
     <div id="container">
         <div id="explanation">
