@@ -4,16 +4,16 @@ var Video = Backbone.Model.extend({
 var VideoView = Backbone.View.extend({
     className: 'video',
 
+    initialize: function() {
+        this.model.bind('change', this.render, this);
+    },
+
     events: {
         'click .video_img': 'selected'
     },
 
     selected: function() {
         document.selectedVideoView.setModel(this.model);
-    },
-
-    initialize: function() {
-        this.model.bind('change', this.render, this);
     },
 
     render: function() {
@@ -25,6 +25,24 @@ var VideoView = Backbone.View.extend({
 });
 var SelectedVideoView = Backbone.View.extend({
     className: 'selectedvideo',
+
+    events: {
+        'click #overlay': 'onClick'
+    },
+
+    initialize: function() {
+        _.bindAll(this, 'onKeypress');
+        $(document).bind('keydown', this.on_keypress);
+    },
+
+    onKeypress: function(e) {
+        if (e.keyCode === 27) this.close();
+    },
+
+    onClick: function(e) {
+               console.log(e);
+        this.close();
+    },
 
     setModel: function(model) {
         this.model = model;
@@ -76,5 +94,6 @@ $(function() {
     videos.fetch();
     var videosView = new VideosView({collection: videos, el: $('#videos')[0]});
 
+    
     document.selectedVideoView = new SelectedVideoView({el: $('#selected_video')[0]});
 });
