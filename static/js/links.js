@@ -27,21 +27,16 @@ var SelectedVideoView = Backbone.View.extend({
     className: 'selectedvideo',
 
     events: {
-        'click #overlay': 'onClick'
+        'click .deselect_link': 'close',
+        'click #overlay': 'close'
     },
-
     initialize: function() {
         _.bindAll(this, 'onKeypress');
-        $(document).bind('keydown', this.on_keypress);
+        $(document).bind('keydown', this.onKeypress);
     },
 
     onKeypress: function(e) {
         if (e.keyCode === 27) this.close();
-    },
-
-    onClick: function(e) {
-               console.log(e);
-        this.close();
     },
 
     setModel: function(model) {
@@ -49,14 +44,9 @@ var SelectedVideoView = Backbone.View.extend({
         this.render();
     },
 
-    events: {
-        'click .deselect_link': 'close'
-    },
-
     render: function() {
         var attrs = this.model.toJSON();
-        renderedTemplate = ich.selected_video_template(attrs); 
-        $(this.el).append(renderedTemplate);
+        $(this.el).append(ich.selected_video_template(attrs));
         $('#selected_video').show();
         return this;
     },
@@ -93,7 +83,5 @@ $(function() {
     videos = new Videos();
     videos.fetch();
     var videosView = new VideosView({collection: videos, el: $('#videos')[0]});
-
-    
     document.selectedVideoView = new SelectedVideoView({el: $('#selected_video')[0]});
 });
