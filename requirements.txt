@@ -3,8 +3,8 @@ pyOpenSSL
 https://github.com/gareth-lloyd/twistedstream/tarball/master
 Flask
 requests
-beautifulsoup
 oauth
 redis
 nosexunit
 pyres
+gunicorn
