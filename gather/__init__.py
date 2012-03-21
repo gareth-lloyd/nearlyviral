@@ -1,12 +1,21 @@
 from datetime import datetime
-from twistedstream import protocol
+from twistedstream import protocol, Stream
 from urlparse import urlparse
 from metadata.store import maybe_fetch_metadata
+from oauth import oauth
+from twisted.internet import reactor
 
 from gather.store import (HourSet, UserLinkSet,
         ENGLISH_LINKS, NON_ENGLISH_LINKS, TOTAL_AUDIENCE)
 from gather.score import english_speaking
+import settings
 
+CONSUMER = oauth.OAuthConsumer(settings.TWITTER_CONSUMER_KEY,
+                           settings.TWITTER_CONSUMER_SECRET)
+TOKEN = oauth.OAuthToken(settings.TWITTER_APP_ACCESS_TOKEN,
+                     settings.TWITTER_APP_ACCESS_TOKEN_SECRET)
+
+STREAM = Stream(CONSUMER, TOKEN)
 
 link_set = UserLinkSet()
 
@@ -57,4 +66,13 @@ class LinkReceiver(protocol.IStreamReceiver):
 
     def disconnected(self, reason):
         print 'disconnected from twitter streaming API at %s' % datetime.now()
+        reactor.callLater(100, setup_receiver)
+
+def setup_receiver():
+    keywords = ['vimeo']
+    def started(arg):
+        print 'started watching'
+
+    d = STREAM.track(LinkReceiver(), keywords)
+    d.addCallback(started)
 
