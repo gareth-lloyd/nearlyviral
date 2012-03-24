@@ -4,6 +4,7 @@ import math
 
 from gather.store import HourSet, ENGLISH_LINKS, NON_ENGLISH_LINKS
 from metadata.store import SortedProperty, PLAYS, LIKES_OVER_PLAYS
+import redis_connection as rc
 
 LIKES = SortedProperty(LIKES_OVER_PLAYS)
 PLAYS = SortedProperty(PLAYS)
@@ -42,10 +43,30 @@ def link_counts(hours=HOURS_BACK):
             id_links[vimeo_id] += links + (0.3 * (nen.member_score(vimeo_id) or 0))
     return id_links.iteritems()
 
+EN_TEMP_SET_KEY = 'en_scoring_union'
+NEN_TEMP_SET_KEY = 'nen_scoring_union'
+def new_link_counts(hours=HOURS_BACK):
+    en_set_keys, nen_set_keys = [], []
+    for hour in range(hours):
+        en_set_keys.append(HourSet(ENGLISH_LINKS, datetime.now() - timedelta(hours=hour)).key)
+        nen_set_keys.append(HourSet(NON_ENGLISH_LINKS, datetime.now() - timedelta(hours=hour)).key)
+
+    rc.conn.zunionstore(EN_TEMP_SET_KEY, en_set_keys)
+    combined_en = SortedProperty(EN_TEMP_SET_KEY)
+
+    rc.conn.zunionstore(NEN_TEMP_SET_KEY, nen_set_keys)
+    combined_nen = SortedProperty(NEN_TEMP_SET_KEY)
+
+    id_links = defaultdict(float)
+    for vimeo_id, links in combined_en.top(50):
+        # add the english links plus a proportion of any other links
+        id_links[vimeo_id] += links + (0.3 * (combined_nen.member_score(vimeo_id) or 0))
+    return id_links.iteritems()
+
 def top_scoring():
     final_scores = [(vimeo_id, score(vimeo_id, num_links))
-            for vimeo_id, num_links in link_counts()]
+            for vimeo_id, num_links in new_link_counts()]
     return list(reversed(sorted(final_scores, key=lambda x: x[1])))[:20]
 
 def most_linked():
-    return list(reversed(sorted(link_counts(), key=lambda x: x[1])))[:20]
+    return list(reversed(sorted(new_link_counts(), key=lambda x: x[1])))[:20]
