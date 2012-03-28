@@ -1,5 +1,6 @@
 from datetime import datetime
 from twistedstream import protocol, Stream
+from twistedstream.stream import CONNECTED, CONNECTING
 from urlparse import urlparse
 from metadata.store import maybe_fetch_metadata
 from oauth import oauth
@@ -69,6 +70,9 @@ class LinkReceiver(protocol.IStreamReceiver):
         reactor.callLater(100, setup_receiver)
 
 def setup_receiver():
+    if STREAM.state in (CONNECTED, CONNECTING):
+        return
+
     keywords = ['vimeo']
     def started(arg):
         print 'started watching'
