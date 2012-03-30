@@ -3,3 +3,4 @@
 *local_settings.py*
 nosetests
 pyres_worker
+static/devindex.html
