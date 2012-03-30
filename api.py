@@ -17,7 +17,7 @@ def popular():
         videos_data = []
         for id, score in top_scoring():
             videos_data.append(VimeoMetadata(id).load().__dict__)
-        return_value = json.dumps(ret)
+        return_value = json.dumps(videos_data)
         rc.conn.set(CACHE_KEY, return_value)
         rc.conn.expire(CACHE_KEY, CACHE_TTL)
     return return_value
