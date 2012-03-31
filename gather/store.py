@@ -8,6 +8,17 @@ ENGLISH_LINKS = 'ENL'
 NON_ENGLISH_LINKS = 'NEL'
 TOTAL_AUDIENCE = 'AUD'
 
+class Count(object):
+    def __init__(self, key):
+        self.key = key
+
+    def increment(self):
+        rc.conn.incr(self.key)
+
+    def get(self):
+        return int(rc.conn.get(self.key))
+
+
 class UserLinkSet(object):
     KEY = 'UL'
 

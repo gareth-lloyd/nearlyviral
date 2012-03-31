@@ -70,6 +70,17 @@ class VimeoMetadata(object):
         except AttributeError:
             raise NotFoundException
 
+    @staticmethod
+    def load_multiple(ids):
+        keys = [_key(VimeoMetadata.PREFIX, id) for id in ids]
+        datas = rc.conn.mget(keys)
+        objs = []
+        for id, data in zip(ids, datas):
+            if data:
+                vimeo_metadata = VimeoMetadata(id)
+                vimeo_metadata._populate(json.loads(data.encode('utf-8')))
+                objs.append(vimeo_metadata)
+        return objs
 
 class SortedProperty(object):
     """Thin wrapper round a redis sorted set to store a numeric
