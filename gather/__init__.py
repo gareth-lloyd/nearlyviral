@@ -7,7 +7,7 @@ from oauth import oauth
 from twisted.internet import reactor
 
 from gather.store import (HourSet, UserLinkSet, Count,
-        ENGLISH_LINKS, NON_ENGLISH_LINKS, TOTAL_AUDIENCE)
+        ENGLISH_LINKS, NON_ENGLISH_LINKS)
 from gather.score import english_speaking
 import settings
 
@@ -50,10 +50,6 @@ class LinkReceiver(protocol.IStreamReceiver):
                 if user_linked_before(vimeo_id, user_id):
                     print 'multiple links by %s to %s' % (user_id, url)
                     continue
-
-                followers = json_obj['user']['followers_count']
-
-                HourSet(TOTAL_AUDIENCE).increment(vimeo_id, followers)
 
                 timezone = json_obj['user']['time_zone']
                 lang = json_obj['user']['lang']

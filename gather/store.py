@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from redis_connection import _key
 import redis_connection as rc
 
@@ -6,7 +6,6 @@ from metadata.store import SortedProperty
 
 ENGLISH_LINKS = 'ENL'
 NON_ENGLISH_LINKS = 'NEL'
-TOTAL_AUDIENCE = 'AUD'
 
 class Count(object):
     def __init__(self, key):
@@ -39,4 +38,14 @@ class HourSet(SortedProperty):
         if dt is None:
             dt = datetime.now()
         self.key = _key(prefix, dt.strftime('%Y%m%d%H'))
+
+
+
+def remove_old(hours_back):
+    now = datetime.now()
+    for hours in range(24, 24+hours_back):
+        dt = now - timedelta(hours=hours)
+        for prefix in (ENGLISH_LINKS, NON_ENGLISH_LINKS):
+            h = HourSet(prefix, dt)
+            h.delete()
 

@@ -104,6 +104,9 @@ class SortedProperty(object):
     def bottom(self, limit=20):
         return rc.conn.zrange(self.key, 0, limit, withscores=True)
 
+    def delete(self):
+        return rc.conn.delete(self.key)
+
 
 class MetaDataFetchTimes(object):
     """Very thin wrapper round a redis sorted set to store the last
