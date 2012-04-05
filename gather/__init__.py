@@ -6,7 +6,7 @@ from metadata.store import maybe_fetch_metadata
 from oauth import oauth
 from twisted.internet import reactor
 
-from gather.store import (HourSet, UserLinkSet, Count,
+from gather.store import (HourSet, UserLinkSet, Count, TwitterComments,
         ENGLISH_LINKS, NON_ENGLISH_LINKS)
 from gather.score import english_speaking
 import settings
@@ -33,6 +33,19 @@ def vimeo_id_from_url(url):
             return fragment
     return False
 
+def maybe_store_tweet(vimeo_id, tweet):
+    """Ignore auto-generated vimeo tweets, retweets and at-replies.
+    """
+    text = tweet['text']
+    if text.startswith('I just uploaded') or text.startswith('I just liked'):
+        return
+    elif 'retweeted_status' in tweet or text.startswith('RT'):
+        return
+    elif text.startswith('@'):
+        return
+    else:
+        TwitterComments(vimeo_id).add_comment(tweet)
+
 def user_linked_before(vimeo_id, user_id):
     return not link_set.update(user_id, vimeo_id)
 
@@ -56,7 +69,9 @@ class LinkReceiver(protocol.IStreamReceiver):
                 text = json_obj['text']
                 if english_speaking(timezone, lang, text):
                     maybe_fetch_metadata(vimeo_id)
-                    HourSet(ENGLISH_LINKS).increment(vimeo_id)
+                    score = HourSet(ENGLISH_LINKS).increment(vimeo_id)
+                    #if score > 1:
+                    maybe_store_tweet(vimeo_id, json_obj)
                 else:
                     HourSet(NON_ENGLISH_LINKS).increment(vimeo_id)
 

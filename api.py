@@ -2,6 +2,7 @@ import json
 
 from gather.score import top_scoring
 from gather import LINK_COUNT
+from gather.store import TwitterComments
 from metadata.store import VimeoMetadata
 import redis_connection as rc
 
@@ -35,6 +36,10 @@ def popular():
         rc.conn.set(CACHE_KEY, return_value)
         rc.conn.expire(CACHE_KEY, CACHE_TTL)
     return return_value
+
+@app.route("/videos/<vimeo_id>/tweets/")
+def tweets(vimeo_id):
+    return json.dumps(TwitterComments(vimeo_id).list())
 
 if __name__ == "__main__":
     app.run(debug=True)

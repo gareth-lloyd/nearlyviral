@@ -20,14 +20,34 @@
                 <img src="{{thumbnail_large}}" />
             </a>
         </div>
+        <div class="tweets">
+            tweets
+        </div>
     </script>
+
+    <script type='text/html' id='tweet_template'>
+        <div class="tweet_picture">
+            <a href="http://twitter.com/#!/{{user.screen_name}}">
+                <img class="avatar" src="{{user.profile_image_url}}" />
+            </a>
+        </div>
+        <div class="tweet_author">
+            <a href="http://twitter.com/#!/{{user.screen_name}}">
+                {{user.screen_name}}
+            </a>
+        </div>
+        <div class="tweet_text">
+            {{text}}
+        </div>
+    </script>
+
     <script type='text/html' id='selected_video_template'>
         <div id="overlay">
         </div>
         <div id="video_player_container">
             <a class="deselect_link"><img src="/img/close.png" /></a>
             <div class="video_player">
-                <iframe 
+                <iframe
                     src="http://player.vimeo.com/video/{{id}}"
                     width="760" height="360"
                     frameborder="0">

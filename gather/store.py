@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from redis_connection import _key
 import redis_connection as rc
+import simplejson as json
 
 from metadata.store import SortedProperty
 
@@ -30,6 +31,7 @@ class UserLinkSet(object):
     def all(self):
         return rc.conn.smembers(self.KEY)
 
+
 class HourSet(SortedProperty):
     """Wraps a redis sorted set. We can get a separate set for each
     hour to divide up our data.
@@ -40,6 +42,25 @@ class HourSet(SortedProperty):
         self.key = _key(prefix, dt.strftime('%Y%m%d%H'))
 
 
+class TwitterComments(object):
+    """Manage stored twitter comments for a particular video. We
+    only want to store a few recent comments.
+    """
+    MAX = 3
+    EXPIRE_AFTER = 86400
+    def __init__(self, video_id):
+        self.key = _key('TLS', video_id)
+
+    def add_comment(self, comment_dict):
+        comment = json.dumps(comment_dict)
+        with rc.conn.pipeline() as pipe:
+            pipe.lpush(self.key, comment)
+            pipe.ltrim(self.key, 0, self.MAX - 1)
+            pipe.expire(self.key, self.EXPIRE_AFTER)
+            pipe.execute()
+
+    def list(self):
+        return map(json.loads, rc.conn.lrange(self.key, 0, self.MAX - 1))
 
 def remove_old(hours_back):
     now = datetime.now()

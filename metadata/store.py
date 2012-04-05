@@ -90,7 +90,7 @@ class SortedProperty(object):
         self.key = key
 
     def increment(self, member, score=1.0):
-        rc.conn.zincrby(self.key, member, score)
+        return rc.conn.zincrby(self.key, member, score)
 
     def add_or_update(self, member, score=1.0):
         rc.conn.zadd(self.key, member, score)
