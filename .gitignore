@@ -4,3 +4,4 @@
 nosetests
 pyres_worker
 static/devindex.html
+design/*

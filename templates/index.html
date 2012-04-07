@@ -13,35 +13,57 @@
     <script src="{{ js_dir }}/links.js" type="text/javascript"></script>
 
     {% raw %}
-    <script type='text/html' id='video_template'>
-        <h2>{{title}}</h2>
+    <script type='text/html' id='video'>
         <div class="video_img">
-            <a id="link_{{id}}" href="#{{id}}" >
-                <img src="{{thumbnail_large}}" />
+            <a class="select_video" id="link_{{id}}" href="#{{id}}" >
+                <img src="{{thumbnail_medium}}" />
             </a>
         </div>
-        <div class="tweets">
-            tweets
+        <div class="video_details">
+        </div>
+    </script>
+    <script type='text/html' id='video_details'>
+        <div class="video_description">
+            <img src="{{user_portrait_small}}" class="user_image"/>
+            by
+            <a class="user_name" href="{{user_url}}">
+                {{user_name}}
+            </a>
+            <div class="description_text">
+                {{#description}}
+                    {{{description}}}
+                {{/description}}
+                {{^description}}
+                    This video has no description.
+                {{/description}}
+            </div>
+        </div>
+        <div class="video_tweets">
+        </div>
+    </script>
+    <script type='text/html' id='video_title'>
+        <h2>{{title}}</h2>
+    </script>
+    <script type='text/html' id='tweet'>
+        <div class="tweet clearfix">
+            <div class="tweet_picture">
+                <a href="http://twitter.com/#!/{{user.screen_name}}">
+                    <img class="avatar" src="{{user.profile_image_url}}" />
+                </a>
+            </div>
+            <div class="tweet_author">
+                {{ user.name }} - 
+                <a href="http://twitter.com/#!/{{user.screen_name}}">
+                    @{{user.screen_name}}
+                </a>
+            </div>
+            <div class="tweet_text">
+                {{text}}
+            </div>
         </div>
     </script>
 
-    <script type='text/html' id='tweet_template'>
-        <div class="tweet_picture">
-            <a href="http://twitter.com/#!/{{user.screen_name}}">
-                <img class="avatar" src="{{user.profile_image_url}}" />
-            </a>
-        </div>
-        <div class="tweet_author">
-            <a href="http://twitter.com/#!/{{user.screen_name}}">
-                {{user.screen_name}}
-            </a>
-        </div>
-        <div class="tweet_text">
-            {{text}}
-        </div>
-    </script>
-
-    <script type='text/html' id='selected_video_template'>
+    <script type='text/html' id='selected_video'>
         <div id="overlay">
         </div>
         <div id="video_player_container">
@@ -61,16 +83,7 @@
 <body>
     <div id="selected_video">
     </div>
-    <div id="container">
-        <div id="explanation">
-            <p>
-            
-            We catch every Vimeo link on Twitter ({{ num_links }} so far) as it happens and use a few tricks
-            to filter them down to this highly interesting list
-            </p>
-        </div>
-        <div id="videos">
-        </div>
+    <div id="videos">
     </div>
 </body>
 </html>

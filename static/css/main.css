@@ -1,15 +1,15 @@
 body {
-  font: .9em helvetica, verdana, arial, sans-serif;
+  font: .7em helvetica, verdana, arial, sans-serif;
   margin: 0;
-  background: #FFF;
+  color: #555;
+  background: #2b8dbd;
+}
+a {
+  color: #2b8dbd;
 }
 /**************
 * VIDEOS
 **************/
-#container {
-    width: 700px;
-    margin: 10px auto;
-}
 #explanation {
     font-size: 2em;
     font-weight: bold;
@@ -17,14 +17,88 @@ body {
     margin: 0 0 10px;
 }
 #videos {
-    background: #ddd;
-    text-align: center;
-    -moz-border-radius: 15px;
-    border-radius: 15px;
+    margin: 15px;
 }
 .video {
-    padding: 20px 0;
+    position: relative;
 }
+.video_img {
+    background: white;
+    padding: 10px;
+    width: 200px;
+    height: 180px;
+}
+.video_img h2 {
+    font-size: 1em;
+}
+.video_description, .video_tweets, .video_controls, .deselected_video {
+    position: absolute;
+    width: 250px;
+    height: 180px;
+    padding: 10px;
+    top: 0;
+    overflow: hidden;
+}
+.deselected_video {
+    left: 220px;
+    color: #194670;
+    width: 400px;
+    font-size: 2em;
+}
+.video_description {
+    background: white;
+    left: 220px;
+}
+.video_tweets{
+    background: #91d6e2;
+    left: 490px;
+}
+.video_controls{
+    background: none;
+    left: 642px;
+    border: solid #56aad4;
+    border-width: 0 0 0 30px;
+}
+.watch_button {
+    display: block;
+    width: 100px;
+    height: 30px;
+    background: white;
+    -moz-border-radius: 4px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #2b8dbd;
+    font-size: 2.1em;
+    text-align: center;
+}
+.user_name {
+    font-size: 1.1em;
+    text-decoration: none;
+    font-weight: bold;
+}
+/******************
+* Tweets
+******************/
+.tweet {
+    margin-bottom: 10px;
+}
+.tweet_picture {
+    float: left;
+    margin-right: 4px;
+}
+.tweet .avatar {
+    width: 48px;
+    height: 48px;
+}
+.tweet_author {
+    font-weight: bold;
+}
+.tweet_author a {
+    font-weight: normal;
+}
+/******************
+* Video player
+******************/
 #overlay {
     position: fixed;
     top: 0%;
@@ -58,3 +132,14 @@ a.deselect_link {
     top: -45;
 }
 
+/* new clearfix */
+.clearfix:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+    }
+* html .clearfix             { zoom: 1; } /* IE6 */
+*:first-child+html .clearfix { zoom: 1; } /* IE7 */
