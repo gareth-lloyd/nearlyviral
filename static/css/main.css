@@ -1,11 +1,10 @@
 body {
-  font: .7em helvetica, verdana, arial, sans-serif;
+  font: .7em helvetica, arial, sans-serif;
   margin: 0;
-  color: #555;
-  background: #2b8dbd;
 }
-a {
-  color: #2b8dbd;
+h1, h2, h3, h4 {
+    font-family: 'Karla', sans-serif;
+    font-weight: bold;
 }
 /**************
 * VIDEOS
@@ -13,7 +12,6 @@ a {
 #explanation {
     font-size: 2em;
     font-weight: bold;
-    color: #777;
     margin: 0 0 10px;
 }
 #videos {
@@ -23,7 +21,6 @@ a {
     position: relative;
 }
 .video_img {
-    background: white;
     padding: 10px;
     width: 200px;
     height: 180px;
@@ -31,9 +28,8 @@ a {
 .video_img h2 {
     font-size: 1em;
 }
-.video_description, .video_tweets, .video_controls, .deselected_video {
+.video_description, .video_tweets, .deselected_video {
     position: absolute;
-    width: 250px;
     height: 180px;
     padding: 10px;
     top: 0;
@@ -41,40 +37,32 @@ a {
 }
 .deselected_video {
     left: 220px;
-    color: #194670;
-    width: 400px;
     font-size: 2em;
 }
+.deselected_video h2 {
+    margin: 0;
+}
 .video_description {
-    background: white;
+    width: 250px;
     left: 220px;
 }
 .video_tweets{
-    background: #91d6e2;
+    width: 250px;
     left: 490px;
 }
-.video_controls{
-    background: none;
-    left: 642px;
-    border: solid #56aad4;
-    border-width: 0 0 0 30px;
-}
 .watch_button {
-    display: block;
-    width: 100px;
-    height: 30px;
-    background: white;
-    -moz-border-radius: 4px;
-    border-radius: 6px;
-    text-decoration: none;
-    color: #2b8dbd;
-    font-size: 2.1em;
-    text-align: center;
 }
 .user_name {
+    font-family: 'Karla', sans-serif;
     font-size: 1.1em;
+    margin: none;
+}
+.user_name a {
     text-decoration: none;
     font-weight: bold;
+}
+.description_text {
+    font-size: 0.8em;
 }
 /******************
 * Tweets
@@ -94,6 +82,7 @@ a {
     font-weight: bold;
 }
 .tweet_author a {
+    text-decoration: none;
     font-weight: normal;
 }
 /******************
@@ -143,3 +132,34 @@ a.deselect_link {
     }
 * html .clearfix             { zoom: 1; } /* IE6 */
 *:first-child+html .clearfix { zoom: 1; } /* IE7 */
+
+/**************
+ * Colours
+ *************/
+body {
+  color: #555;
+  background: #69D2E7;
+}
+.video_img, .video_description, .video_tweets {
+    background: white;
+}
+h1, h2, h3, h4 {
+}
+a {
+  color: #69D2E7;
+}
+#explanation {
+    color: #777;
+}
+.deselected_video {
+    color: white;
+}
+.user_name a {
+    color: #F38630;
+}
+.tweet_author {
+    color: #F38630;
+}
+.tweet_author a {
+    color: #69D2E7;
+}
