@@ -19,7 +19,6 @@ var TweetsAboutVideo = Backbone.Collection.extend({
 });
 var Video = Backbone.Model.extend({
     defaults: {
-        'isSelected': false,
         'watched': false
     }
 });
@@ -33,10 +32,8 @@ var VideoView = Backbone.View.extend({
         'click .watch_button': 'watch'
     },
     select: function() {
-        var thisModel = this.model;
-        document.videos.each(function(video) {
-            if (video != thisModel)
-                video.trigger('deselected');
+        _(document.videos.without(this.model)).each(function(video) {
+            video.trigger('deselected');
         });
         $(this.videoDetails).empty();
         var selectedView = new VideoSelectedView({model: this.model});
@@ -77,6 +74,8 @@ var VideoSelectedView = Backbone.View.extend({
         var attrs = this.model.toJSON();
         renderedTemplate = ich.video_details(attrs);
         $(this.el).append(renderedTemplate);
+        // hack to remove linebreaks
+        $(this.el).find('br').hide();
 
         var tweetsEl = $(this.el).find('.video_tweets');
         var tweets = new TweetsAboutVideo([], {vimeo_id: attrs.id});
@@ -84,6 +83,7 @@ var VideoSelectedView = Backbone.View.extend({
         var tweetsView = new CollectionView(
             {memberViewClass: TweetView, collection: tweets, el: tweetsEl}
         );
+
         return this;
     }
 });
