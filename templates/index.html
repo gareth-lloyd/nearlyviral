@@ -15,9 +15,12 @@
 
     {% raw %}
     <script type='text/html' id='video'>
-        <div class="video_img">
-            <a class="select_video" id="link_{{id}}" href="#{{id}}" >
+        <div class="video_controls">
+            <a class="video_details_link" href="#{{id}}/details">
                 <img src="{{thumbnail_medium}}" />
+            </a>
+            <a class="watch_video_link" href="#{{id}}/watch">
+                Watch
             </a>
         </div>
         <div class="video_details">
@@ -35,8 +38,6 @@
             <div class="description_text">
                 {{{description}}}
             </div>
-        </div>
-        <div class="video_tweets">
         </div>
     </script>
     <script type='text/html' id='video_title'>
@@ -61,7 +62,7 @@
         </div>
     </script>
 
-    <script type='text/html' id='selected_video'>
+    <script type='text/html' id='video_player'>
         <div id="overlay">
         </div>
         <div id="video_player_container">
@@ -82,7 +83,7 @@
     <div id="selected_video">
     </div>
     <div id="explanation">
-        We watch every Vimeo link on Twitter to bring you this interesting list.
+        We catch every Vimeo link on Twitter to create this <em>highly</em> interesting list.
     </div>
     <div id="videos">
     </div>

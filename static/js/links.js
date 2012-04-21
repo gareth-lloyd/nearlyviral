@@ -17,85 +17,113 @@ var TweetsAboutVideo = Backbone.Collection.extend({
         return '/videos/' + this.vimeo_id + '/tweets/';
     }
 });
+
+
 var Video = Backbone.Model.extend({
-    defaults: {
-        'isSelected': false,
-        'watched': false
-    }
 });
 var VideoView = Backbone.View.extend({
     className: 'video',
     initialize: function() {
-        this.model.on('deselected', this.deselect, this);
+        // the VideoView has several subsidiary, modal views
+        this.detailsView = new VideoDetailsView({model: this.model});
+        this.tweetsView = new TweetsAboutVideoView({model: this.model});
+        this.deselectedView = new VideoDeselectedView({model: this.model});
+        // start in deselected state
+        this.model.trigger('deselected');
     },
     events: {
-        'click .video_img': 'select',
-        'click .watch_button': 'watch'
+        'click .video_details_link': 'select',
+        'click .watch_video_link': 'watch'
     },
     select: function() {
-        var thisModel = this.model;
-        document.videos.each(function(video) {
-            if (video != thisModel)
-                video.trigger('deselected');
+        var toDeselect = this.model.collection.without(this.model);
+        _(toDeselect).each(function(video) {
+            video.trigger('deselected');
         });
-        $(this.videoDetails).empty();
-        var selectedView = new VideoSelectedView({model: this.model});
-        $(this.videoDetails).append(selectedView.el);
-    },
-    deselect: function() {
-        $(this.videoDetails).empty();
-        var deselectedView = new VideoDeselectedView({model: this.model});
-        $(this.videoDetails).append(deselectedView.el);
+        this.model.trigger('selected');
     },
     watch: function() {
-        document.videoPlayer.setModel(this.model);
+        window.videoPlayer.setModel(this.model);
     },
     render: function() {
+        $(this.el).empty();
         var renderedTemplate = ich.video(this.model.toJSON());
         $(this.el).append(renderedTemplate);
-        this.videoDetails = $(this.el).find('.video_details')[0];
-        this.deselect();
+
+        this.$watchButton = $(this.$('.watch_video_link')[0]);
+        var $videoDetails = $(this.$('.video_details')[0]);
+        $videoDetails.append(this.deselectedView.el, this.detailsView.el,
+                this.tweetsView.el);
         return this;
     }
 });
-var VideoDeselectedView = Backbone.View.extend({
-    className: 'deselected_video',
+var ModalView = Backbone.View.extend({
+    xStart: 0,
+    xFinish: 230,
     initialize: function() {
         this.render();
+        this.model.on('deselected', this.deselect, this);
+        this.model.on('selected', this.select, this);
+    },
+    select: function() {
+        $(this.el).css({left: this.xStart, 'z-index': -1}).show().animate({left: this.xFinish});
+    },
+    deselect: function() {
+        $(this.el).hide();
+    }
+});
+var VideoDetailsView = ModalView.extend({
+    className: 'selected_video',
+    render: function() {
+        $(this.el).append(ich.video_details(this.model.toJSON()));
+        return this;
+    }
+});
+var VideoDeselectedView = ModalView.extend({
+    className: 'deselected_video',
+    select: function() {
+        $(this.el).fadeOut();
+    },
+    deselect: function() {
+        $(this.el).fadeIn();
     },
     render: function() {
         $(this.el).append(ich.video_title(this.model.toJSON()));
         return this;
     }
 });
-var VideoSelectedView = Backbone.View.extend({
-    className: 'selected_video',
+var TweetsAboutVideoView = ModalView.extend({
+    xFinish: 510,
+    className: 'video_tweets',
     initialize: function() {
-        this.render();
+        this.tweets = new TweetsAboutVideo([], {vimeo_id: this.model.get('id')});
+        this.tweets.bind('reset', this.render, this);
+        ModalView.prototype.initialize.call(this);
+    },
+    select: function() {
+        if (!this.tweets.length)
+            this.tweets.fetch();
+        ModalView.prototype.select.call(this);
     },
     render: function() {
-        var attrs = this.model.toJSON();
-        renderedTemplate = ich.video_details(attrs);
-        $(this.el).append(renderedTemplate);
-
-        var tweetsEl = $(this.el).find('.video_tweets');
-        var tweets = new TweetsAboutVideo([], {vimeo_id: attrs.id});
-        tweets.fetch();
-        var tweetsView = new CollectionView(
-            {memberViewClass: TweetView, collection: tweets, el: tweetsEl}
-        );
+        $(this.el).empty();
+        if (this.tweets.length)
+            this.tweets.each(function(tweet) {
+                $(this.el).append(new TweetView({model: tweet}).render().el);
+            }.bind(this));
+        else
+            this.$el.text("We haven't recorded any tweets about this video");
         return this;
     }
 });
 var VideoPlayer = Backbone.View.extend({
-    className: 'video_player',
     events: {
         'click .deselect_link': 'close',
         'click #overlay': 'close'
     },
     initialize: function() {
         _.bindAll(this, 'onKeypress');
-        $(document).bind('keydown', this.onKeypress);
+        $(window).bind('keydown', this.onKeypress);
     },
     onKeypress: function(e) {
         if (e.keyCode === 27) this.close();
@@ -105,14 +133,11 @@ var VideoPlayer = Backbone.View.extend({
         this.render();
     },
     render: function() {
-        var attrs = this.model.toJSON();
-        $(this.el).append(ich.selected_video(attrs));
-        $('#selected_video').show();
+        $(this.el).append(ich.video_player(this.model.toJSON()));
         return this;
     },
     close: function() {
         $(this.el).empty();
-        $('#selected_video').hide();
     }
 });
 var Videos = Backbone.Collection.extend({
@@ -123,6 +148,7 @@ var CollectionView = Backbone.View.extend({
     initialize: function() {
         this.memberViews = [];
         this.collection.bind('reset', this.render, this);
+        this.collection.fetch();
     },
     hideAllExcept: function(selectedId) {
     },
@@ -141,11 +167,8 @@ var CollectionView = Backbone.View.extend({
 });
 
 $(function() {
-    // page only ever has one videos collection and one video player, hence the globals.
-    document.videos = new Videos();
-    document.videos.fetch();
-    document.videosView = new CollectionView(
-        {memberViewClass: VideoView, collection: document.videos, el: $('#videos')[0]}
+    window.videosView = new CollectionView(
+        {memberViewClass: VideoView, collection: new Videos(), el: $('#videos')[0]}
     );
-    document.videoPlayer = new VideoPlayer({el: $('#selected_video')[0]});
+    window.videoPlayer = new VideoPlayer({el: $('#selected_video')[0]});
 });
