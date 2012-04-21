@@ -1,9 +1,10 @@
 body {
-    font: .7em helvetica, arial, sans-serif;
+    font: 10px helvetica, arial, sans-serif;
     margin: 15px;
     z-index: -10;
 }
 h1, h2, h3, h4 {
+    font-size: 1em;
     font-family: 'Karla', sans-serif;
     font-weight: bold;
 }
@@ -11,9 +12,9 @@ h1, h2, h3, h4 {
 * VIDEOS
 **************/
 #explanation {
-    font-size: 3.5em;
+    font-size: 48px;
     font-weight: bold;
-    margin: 0 0 10px;
+    margin: 0 0 30px;
 }
 #videos {
     z-index: 0;
@@ -26,15 +27,20 @@ h1, h2, h3, h4 {
 .video_controls {
     padding: 0 10px 20px;
     width: 200px;
-    height: 180px;
+}
+.video_details_link{
+    display: block;
+    height: 150px;
 }
 .watch_video_link {
     font-weight: bold;
     font-family: 'Karla', sans-serif;
-    font-size: 2em;
+    font-size: 24px;
     text-align: center;
     text-decoration: none;
     display: block;
+    margin: 0;
+    padding: 0;
 }
 .selected_video, .video_tweets, .deselected_video {
     position: absolute;
@@ -47,7 +53,8 @@ h1, h2, h3, h4 {
 .deselected_video {
     left: 220px;
     padding: 0 10px;
-    font-size: 2em;
+    font-size: 36px;
+    font-family: 'Karla', sans-serif;
     z-index: -5;
     width: 450px;
 }
@@ -66,15 +73,12 @@ h1, h2, h3, h4 {
 }
 .user_name {
     font-family: 'Karla', sans-serif;
-    font-size: 1.1em;
+    font-size: 14px;
     margin: none;
 }
 .user_name a {
     text-decoration: none;
     font-weight: bold;
-}
-.description_text {
-    font-size: 0.8em;
 }
 /******************
 * Tweets
@@ -130,20 +134,8 @@ a.deselect_link {
     display: block;
     position: absolute;
     right: 0;
-    top: -45;
+    top: -45px;
 }
-
-/* new clearfix */
-.clearfix:after {
-    visibility: hidden;
-    display: block;
-    font-size: 0;
-    content: " ";
-    clear: both;
-    height: 0;
-    }
-* html .clearfix             { zoom: 1; } /* IE6 */
-*:first-child+html .clearfix { zoom: 1; } /* IE7 */
 
 /**************
  * Colours
@@ -183,3 +175,15 @@ a {
 .tweet_author a {
     color: #69D2E7;
 }
+/* new clearfix */
+.clearfix:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+    }
+* html .clearfix             { zoom: 1; } /* IE6 */
+*:first-child+html .clearfix { zoom: 1; } /* IE7 */
+
