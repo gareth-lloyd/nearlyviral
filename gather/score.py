@@ -66,7 +66,8 @@ def new_link_counts(hours=HOURS_BACK):
 def top_scoring():
     final_scores = [(vimeo_id, score(vimeo_id, num_links))
             for vimeo_id, num_links in new_link_counts()]
-    return list(reversed(sorted(final_scores, key=lambda x: x[1])))[:20]
+    final_scores = sorted(final_scores, key=lambda x: x[1])[-30:]
+    return list(reversed(final_scores))
 
 def most_linked():
     return list(reversed(sorted(new_link_counts(), key=lambda x: x[1])))[:20]

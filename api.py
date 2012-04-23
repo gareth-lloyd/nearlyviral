@@ -20,6 +20,12 @@ app = Flask(__name__)
 CACHE_KEY = 'popular_cache'
 CACHE_TTL = 600
 
+with open('textfiles/banned_uploaders.txt') as f:
+    BANNED_UPLOADERS = set([line.strip() for line in f.readlines()])
+
+def permitted_user(video):
+    return video.user_name not in BANNED_UPLOADERS
+
 @app.route("/")
 def index():
     template_data = DEFAULTS
@@ -31,6 +37,7 @@ def popular():
     return_value = rc.conn.get(CACHE_KEY)
     if not return_value:
         videos = VimeoMetadata.load_multiple([id for id, _ in top_scoring()])
+        videos = filter(permitted_user, videos)[:15]
         videos_data = [video.__dict__ for video in videos]
         return_value = json.dumps(videos_data)
         rc.conn.set(CACHE_KEY, return_value)

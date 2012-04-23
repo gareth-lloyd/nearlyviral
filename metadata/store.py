@@ -72,6 +72,8 @@ class VimeoMetadata(object):
 
     @staticmethod
     def load_multiple(ids):
+        if not ids:
+            return []
         keys = [_key(VimeoMetadata.PREFIX, id) for id in ids]
         datas = rc.conn.mget(keys)
         objs = []

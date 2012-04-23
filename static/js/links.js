@@ -66,7 +66,7 @@ var ModalView = Backbone.View.extend({
         this.model.on('selected', this.select, this);
     },
     select: function() {
-        $(this.el).css({left: this.xStart, 'z-index': -1}).show().animate({left: this.xFinish});
+        $(this.el).css({left: this.xStart}).show().animate({left: this.xFinish});
     },
     deselect: function() {
         $(this.el).hide();
