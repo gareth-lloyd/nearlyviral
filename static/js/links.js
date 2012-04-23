@@ -142,7 +142,7 @@ var VideoPlayer = Backbone.View.extend({
 });
 var Videos = Backbone.Collection.extend({
     model: Video,
-    url: '/videos/',
+    url: '/videos/'
 });
 var CollectionView = Backbone.View.extend({
     initialize: function() {
