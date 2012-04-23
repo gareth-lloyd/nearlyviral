@@ -8,7 +8,6 @@ import redis_connection as rc
 
 PLAYS = 'PLS'
 LIKES_OVER_PLAYS = 'LOP'
-COMMENTS_OVER_PLAYS = 'LOC'
 
 resq = ResQ()
 
@@ -58,15 +57,6 @@ class VimeoMetadata(object):
                 return 0
             else:
                 return float(self.stats_number_of_likes) / self.stats_number_of_plays
-        except AttributeError:
-            raise NotFoundException
-
-    def comments_over_plays(self):
-        try:
-            if not self.stats_number_of_plays:
-                return 0
-            else:
-                return float(self.stats_number_of_comments) / self.stats_number_of_plays
         except AttributeError:
             raise NotFoundException
 
@@ -140,7 +130,6 @@ class FetchVimeoDataTask(object):
         try:
             metadata = VimeoMetadata(vimeo_id)
             metadata._from_api()
-            SortedProperty(COMMENTS_OVER_PLAYS).add_or_update(vimeo_id, metadata.comments_over_plays())
             SortedProperty(LIKES_OVER_PLAYS).add_or_update(vimeo_id, metadata.likes_over_plays())
             SortedProperty(PLAYS).add_or_update(vimeo_id, metadata.stats_number_of_plays)
         except vimeo.InvalidVideoId:
