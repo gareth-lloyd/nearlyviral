@@ -6,7 +6,7 @@ from metadata.store import maybe_fetch_metadata
 from oauth import oauth
 from twisted.internet import reactor
 
-from gather.store import (HourSet, UserLinkSet, Count, TwitterComments,
+from gather.store import (HourSet, UserLinkRecord, Count, TwitterComments,
         ENGLISH_LINKS, NON_ENGLISH_LINKS)
 from gather.score import english_speaking
 import settings
@@ -18,8 +18,6 @@ TOKEN = oauth.OAuthToken(settings.TWITTER_APP_ACCESS_TOKEN,
 
 STREAM = Stream(CONSUMER, TOKEN)
 LINK_COUNT = Count('total_links')
-
-link_set = UserLinkSet()
 
 def vimeo_id_from_url(url):
     url = url or ''
@@ -46,9 +44,6 @@ def maybe_store_tweet(vimeo_id, tweet):
     else:
         TwitterComments(vimeo_id).add_comment(tweet)
 
-def user_linked_before(vimeo_id, user_id):
-    return not link_set.update(user_id, vimeo_id)
-
 class LinkReceiver(protocol.IStreamReceiver):
     def status(self, json_obj):
         try:
@@ -60,7 +55,7 @@ class LinkReceiver(protocol.IStreamReceiver):
                     print 'No vid link %s' % url
                     continue
                 LINK_COUNT.increment()
-                if user_linked_before(vimeo_id, user_id):
+                if UserLinkRecord.has_linked_before(vimeo_id, user_id):
                     print 'multiple links by %s to %s' % (user_id, url)
                     continue
 

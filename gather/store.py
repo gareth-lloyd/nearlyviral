@@ -7,6 +7,7 @@ from metadata.store import SortedProperty
 
 ENGLISH_LINKS = 'ENL'
 NON_ENGLISH_LINKS = 'NEL'
+DOUBLE_LINK_EXCLUSION_TIME = 24 * 60 * 60
 
 class Count(object):
     def __init__(self, key):
@@ -18,19 +19,20 @@ class Count(object):
     def get(self):
         return int(rc.conn.get(self.key))
 
-
-class UserLinkSet(object):
-    KEY = 'UL'
-
-    def update(self, user_id, vimeo_id):
+class UserLinkRecord(object):
+    @staticmethod
+    def has_linked_before(user_id, vimeo_id):
         """Returns 1 if the user has not linked before, and we
         therefore recorded the link, otherwise 0.
         """
-        return rc.conn.sadd(self.KEY, _key(str(user_id), vimeo_id))
-
-    def all(self):
-        return rc.conn.smembers(self.KEY)
-
+        key = 'UL:%s:%s' % (user_id, vimeo_id)
+        if rc.conn.exists(key):
+            return True
+        else:
+            # no need to worry about race conditions in current design
+            rc.conn.set(key, 1)
+            rc.conn.expire(key, DOUBLE_LINK_EXCLUSION_TIME)
+            return False
 
 class HourSet(SortedProperty):
     """Wraps a redis sorted set. We can get a separate set for each
