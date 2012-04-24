@@ -8,6 +8,7 @@ import redis_connection as rc
 
 PLAYS = 'PLS'
 LIKES_OVER_PLAYS = 'LOP'
+METADATA_TTL = 60 * 60 * 12 # seconds
 
 resq = ResQ()
 
@@ -28,9 +29,10 @@ class VimeoMetadata(object):
         else:
             return json.loads(raw_data.decode('utf8'))
 
-    def _from_api(self):
+    def _fetch_and_save_data(self):
         data_dict = vimeo.vimeo_data(self.vimeo_id)
         rc.conn.set(self.key, json.dumps(data_dict))
+        rc.conn.expire(self.key, METADATA_TTL)
         self._populate(data_dict)
 
     def _populate(self, data):
@@ -40,7 +42,7 @@ class VimeoMetadata(object):
         try:
             data = self._from_store()
         except NotFoundException:
-            data = self._from_api()
+            data = self._fetch_and_save_data()
         self._populate(data)
         return self
 
@@ -50,6 +52,12 @@ class VimeoMetadata(object):
         data = self._from_store()
         self._populate(data)
         return self
+
+    def present(self):
+        return rc.conn.exists(self.key)
+
+    def needs_refresh(self):
+        return rc.conn.ttl(self.key) < 3600
 
     def likes_over_plays(self):
         try:
@@ -99,28 +107,10 @@ class SortedProperty(object):
     def delete(self):
         return rc.conn.delete(self.key)
 
-
-class MetaDataFetchTimes(object):
-    """Very thin wrapper round a redis sorted set to store the last
-    time we fetched data for a particular vimeo video.
-    """
-    KEY = 'LMF'
-    @staticmethod
-    def get(vimeo_id):
-        return rc.conn.zscore(MetaDataFetchTimes.KEY, vimeo_id)
-
-    @staticmethod
-    def set(vimeo_id, t):
-        return rc.conn.zadd(MetaDataFetchTimes.KEY, vimeo_id, t)
-
-
 def maybe_fetch_metadata(vimeo_id):
-    now = time()
-    last_fetch = MetaDataFetchTimes.get(vimeo_id)
-    if last_fetch is None or (now - last_fetch) > 3600:
-        MetaDataFetchTimes.set(vimeo_id, now)
+    metadata = VimeoMetadata(vimeo_id)
+    if (not metadata.present()) or metadata.needs_refresh():
         resq.enqueue(FetchVimeoDataTask, vimeo_id)
-
 
 class FetchVimeoDataTask(object):
     queue = 'vimeo'
@@ -129,11 +119,12 @@ class FetchVimeoDataTask(object):
     def perform(vimeo_id):
         try:
             metadata = VimeoMetadata(vimeo_id)
-            metadata._from_api()
-            SortedProperty(LIKES_OVER_PLAYS).add_or_update(vimeo_id, metadata.likes_over_plays())
-            SortedProperty(PLAYS).add_or_update(vimeo_id, metadata.stats_number_of_plays)
+            metadata._fetch_and_save_data()
+            lop = metadata.likes_over_plays()
+            if lop:
+                SortedProperty(LIKES_OVER_PLAYS).add_or_update(vimeo_id, lop)
+                SortedProperty(PLAYS).add_or_update(vimeo_id, metadata.stats_number_of_plays)
         except vimeo.InvalidVideoId:
-            print 'invalid vimeo id'
             return
         except vimeo.ApiCallFailed:
             raise
