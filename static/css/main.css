@@ -13,9 +13,14 @@ a img {
 /**************
 * VIDEOS
 **************/
-#explanation {
+#explanation h1 {
     font-size: 48px;
     font-weight: bold;
+    margin: 25px 0 0;
+}
+#explanation p {
+    font-size: 18px;
+    font-style: italic;
     margin: 0 0 30px;
 }
 #videos {
