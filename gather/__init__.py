@@ -1,13 +1,13 @@
 from datetime import datetime
 from twistedstream import protocol, Stream
 from twistedstream.stream import CONNECTED, CONNECTING
-from urlparse import urlparse
 from metadata.store import maybe_fetch_metadata
 from oauth import oauth
 from twisted.internet import reactor
 
 from gather.store import (HourSet, UserLinkRecord, Count, TwitterComments,
         ENGLISH_LINKS, NON_ENGLISH_LINKS)
+from gather.process_links import vimeo_id_from_url
 from gather.score import english_speaking
 import settings
 
@@ -19,17 +19,6 @@ TOKEN = oauth.OAuthToken(settings.TWITTER_APP_ACCESS_TOKEN,
 STREAM = Stream(CONSUMER, TOKEN)
 LINK_COUNT = Count('total_links')
 
-def vimeo_id_from_url(url):
-    url = url or ''
-    scheme, domain, path, params, query, fragment = urlparse(url)
-
-    if domain.lower() in ('vimeo.com', 'www.vimeo.com', 'player.vimeo.com'):
-        for path_segment in path.split('/'):
-            if path_segment.isdigit():
-                return path_segment
-        if fragment.isdigit():
-            return fragment
-    return False
 
 def maybe_store_tweet(vimeo_id, tweet):
     """Ignore auto-generated vimeo tweets, retweets and at-replies.
@@ -64,8 +53,7 @@ class LinkReceiver(protocol.IStreamReceiver):
                 text = json_obj['text']
                 if english_speaking(timezone, lang, text):
                     maybe_fetch_metadata(vimeo_id)
-                    score = HourSet(ENGLISH_LINKS).increment(vimeo_id)
-                    #if score > 1:
+                    HourSet(ENGLISH_LINKS).increment(vimeo_id)
                     maybe_store_tweet(vimeo_id, json_obj)
                 else:
                     HourSet(NON_ENGLISH_LINKS).increment(vimeo_id)
