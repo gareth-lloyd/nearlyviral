@@ -1,7 +1,8 @@
 from unittest import TestCase
-from gather import vimeo_id_from_url
+from gather.process_links import parse_vimeo_url, NonVimeoUrl
 
 TEST_DATA = {
+    '/38221464': '38221464',
     'https://vimeo.com/38221464': '38221464',
     'http://www.vimeo.com/38221464': '38221464',
     'http://vimeo.com/m/37119711': '37119711',
@@ -20,6 +21,9 @@ class UrlRecognitionTests(TestCase):
     def test_vid_identifier(self):
         def test(url_id):
             url, vimeo_id= url_id[0], url_id[1]
-            self.assertEquals(vimeo_id, vimeo_id_from_url(url))
+            if not vimeo_id:
+                self.assertRaises(NonVimeoUrl, parse_vimeo_url, url)
+            else:
+                self.assertEquals(vimeo_id, parse_vimeo_url(url))
 
         map(test, TEST_DATA.iteritems())
